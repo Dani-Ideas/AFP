@@ -137,8 +137,8 @@ public class Inicio {
 
     private void siguienteToken() {
         try {
-            tokens = analizador.yylex();
-            if (tokens == null) {
+            tokens = analizador.yylex(); // me da el sigioente token para los paisanos
+            if (tokens == null) { // si es null fin ya acabo
                 tokens = new Tokens("EOF", Sym.EOF, 0, 0);
                 throw new IOException("Fin Archivo");
             }
