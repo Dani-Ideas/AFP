@@ -16,15 +16,20 @@ public class AutomataPila {
 
     public boolean analizar() {
         siguienteToken();
-        while (!pila.isEmpty() && tokenActual != null) {
+        while (!pila.isEmpty()) {
             int topePila = pila.peek();
 
             System.out.println("Pila: " + representarPila() +
                     " | Entrada: " + tokenActual.getToken());
 
-            if (topePila == tokenActual.getLexema()) {
-                pila.pop();
-                siguienteToken();
+            if (esTerminal(topePila)) {
+                if (topePila == tokenActual.getLexema()) {
+                    pila.pop();
+                    siguienteToken();
+                } else {
+                    error("Se esperaba: '" + simboloToString(topePila) + "'");
+                    return false;
+                }
             } else {
                 switch (topePila) {
                     case Sym.PILA_S:
@@ -40,12 +45,11 @@ public class AutomataPila {
                         break;
 
                     case Sym.PILA_A:
+                        pila.pop();
                         if (tokenActual.getLexema() == Sym.LETRA_A) {
-                            pila.pop();
                             pila.push(Sym.LETRA_A);
-                        } else {
-                            pila.pop(); // A → λ
                         }
+                        // A → λ en caso contrario
                         break;
 
                     case Sym.PILA_B:
@@ -61,43 +65,50 @@ public class AutomataPila {
                         break;
 
                     case Sym.PILA_C:
+                        pila.pop();
                         if (tokenActual.getLexema() == Sym.LETRA_C) {
-                            pila.pop();
                             pila.push(Sym.LETRA_C);
-                        } else {
-                            pila.pop(); // C → λ
                         }
+                        // C → λ en caso contrario
                         break;
 
                     default:
-                        error("Símbolo inesperado en pila: " + topePila);
+                        error("Símbolo inesperado en pila: " + simboloToString(topePila));
                         return false;
                 }
             }
         }
 
-        return pila.size() == 1 &&
-                pila.peek() == Sym.PUNTOCOMA &&
-                tokenActual.getLexema() == Sym.PUNTOCOMA;
+        return tokenActual.getLexema() == Sym.PUNTOCOMA;
+    }
+
+    private boolean esTerminal(int simbolo) {
+        return simbolo == Sym.LETRA_A || simbolo == Sym.LETRA_B ||
+                simbolo == Sym.LETRA_C || simbolo == Sym.LETRA_D ||
+                simbolo == Sym.PUNTOCOMA;
     }
 
     private String representarPila() {
         StringBuilder sb = new StringBuilder();
         for (int simbolo : pila) {
-            switch (simbolo) {
-                case Sym.PILA_S: sb.append("S"); break;
-                case Sym.PILA_A: sb.append("A"); break;
-                case Sym.PILA_B: sb.append("B"); break;
-                case Sym.PILA_C: sb.append("C"); break;
-                case Sym.PUNTOCOMA: sb.append(";"); break;
-                case Sym.LETRA_A: sb.append("a"); break;
-                case Sym.LETRA_B: sb.append("b"); break;
-                case Sym.LETRA_C: sb.append("c"); break;
-                case Sym.LETRA_D: sb.append("d"); break;
-                default: sb.append("?");
-            }
+            sb.append(simboloToString(simbolo));
         }
         return sb.toString();
+    }
+
+    private String simboloToString(int simbolo) {
+        switch (simbolo) {
+            case Sym.PILA_S: return "S";
+            case Sym.PILA_A: return "A";
+            case Sym.PILA_B: return "B";
+            case Sym.PILA_C: return "C";
+            case Sym.PUNTOCOMA: return ";";
+            case Sym.LETRA_A: return "a";
+            case Sym.LETRA_B: return "b";
+            case Sym.LETRA_C: return "c";
+            case Sym.LETRA_D: return "d";
+            default: return "?";
+        }
     }
 
     private void siguienteToken() {
