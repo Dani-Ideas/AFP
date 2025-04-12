@@ -7,13 +7,11 @@ public class AutomataPila {
     private Stack<Integer> pila = new Stack<>();
     private Tokens tokenActual;
     private Lexico analizador;
-    private boolean aceptado = false;
 
     public AutomataPila(Lexico analizador) {
         this.analizador = analizador;
-        // Inicializar pila con símbolo inicial (S) y símbolo de fondo (;)
-        pila.push(Sym.PUNTOCOMA); // Símbolo de fondo de pila
-        pila.push(Sym.PILA_S);     // Símbolo inicial S (para la pila)
+        pila.push(Sym.PUNTOCOMA); // Símbolo de fondo
+        pila.push(Sym.PILA_S);    // Símbolo inicial
     }
 
     public boolean analizar() {
@@ -21,67 +19,66 @@ public class AutomataPila {
         while (!pila.isEmpty() && tokenActual != null) {
             int topePila = pila.peek();
 
-            System.out.println("Pila: " + representarPila() + " | Entrada: " +
-                    (tokenActual != null ? tokenActual.getToken() : "EOF"));
+            System.out.println("Pila: " + representarPila() +
+                    " | Entrada: " + tokenActual.getToken());
 
             if (topePila == tokenActual.getLexema()) {
-                // Coincidencia entre tope de pila y token actual
                 pila.pop();
                 siguienteToken();
             } else {
-                // Aplicar reglas de producción
                 switch (topePila) {
-                    case Sym.PILA_S: // S → AB
+                    case Sym.PILA_S:
                         if (tokenActual.getLexema() == Sym.LETRA_A ||
                                 tokenActual.getLexema() == Sym.LETRA_B) {
-                            pila.pop(); // Sacar S
-                            pila.push(Sym.PILA_B); // Primero B
-                            pila.push(Sym.PILA_A); // Luego A
+                            pila.pop();
+                            pila.push(Sym.PILA_B);
+                            pila.push(Sym.PILA_A);
                         } else {
-                            return false; // Error sintáctico
+                            error("Se esperaba 'a' o 'b'");
+                            return false;
                         }
                         break;
 
-                    case Sym.PILA_A: // A → a | λ
+                    case Sym.PILA_A:
                         if (tokenActual.getLexema() == Sym.LETRA_A) {
-                            pila.pop(); // Sacar A
-                            pila.push(Sym.LETRA_A); // Poner a (token)
+                            pila.pop();
+                            pila.push(Sym.LETRA_A);
                         } else {
-                            pila.pop(); // A → λ (epsilon)
+                            pila.pop(); // A → λ
                         }
                         break;
 
-                    case Sym.PILA_B: // B → bCd
+                    case Sym.PILA_B:
                         if (tokenActual.getLexema() == Sym.LETRA_B) {
-                            pila.pop(); // Sacar B
-                            pila.push(Sym.LETRA_D); // Primero d
-                            pila.push(Sym.PILA_C);  // Luego C
-                            pila.push(Sym.LETRA_B); // Luego b (token)
+                            pila.pop();
+                            pila.push(Sym.LETRA_D);
+                            pila.push(Sym.PILA_C);
+                            pila.push(Sym.LETRA_B);
                         } else {
-                            return false; // Error sintáctico
+                            error("Se esperaba 'b'");
+                            return false;
                         }
                         break;
 
-                    case Sym.PILA_C: // C → c | λ
+                    case Sym.PILA_C:
                         if (tokenActual.getLexema() == Sym.LETRA_C) {
-                            pila.pop(); // Sacar C
-                            pila.push(Sym.LETRA_C); // Poner c (token)
+                            pila.pop();
+                            pila.push(Sym.LETRA_C);
                         } else {
-                            pila.pop(); // C → λ (epsilon)
+                            pila.pop(); // C → λ
                         }
                         break;
 
                     default:
-                        return false; // Símbolo inesperado en la pila
+                        error("Símbolo inesperado en pila: " + topePila);
+                        return false;
                 }
             }
         }
 
-        // Aceptar si la pila está vacía (solo quedó el ; de fondo) y llegamos al ;
-        aceptado = pila.isEmpty() ||
-                (pila.size() == 1 && pila.peek() == Sym.PUNTOCOMA &&
-                        tokenActual.getLexema() == Sym.PUNTOCOMA);
-        return aceptado;
+        return pila.size() == 1 &&
+                pila.peek() == Sym.PUNTOCOMA &&
+                tokenActual.getLexema() == Sym.PUNTOCOMA;
     }
 
     private String representarPila() {
@@ -92,9 +89,12 @@ public class AutomataPila {
                 case Sym.PILA_A: sb.append("A"); break;
                 case Sym.PILA_B: sb.append("B"); break;
                 case Sym.PILA_C: sb.append("C"); break;
-                case Sym.PILA_D: sb.append("D"); break;
                 case Sym.PUNTOCOMA: sb.append(";"); break;
-                default: sb.append((char) simbolo);
+                case Sym.LETRA_A: sb.append("a"); break;
+                case Sym.LETRA_B: sb.append("b"); break;
+                case Sym.LETRA_C: sb.append("c"); break;
+                case Sym.LETRA_D: sb.append("d"); break;
+                default: sb.append("?");
             }
         }
         return sb.toString();
@@ -107,7 +107,15 @@ public class AutomataPila {
                 tokenActual = new Tokens(";", Sym.PUNTOCOMA, 0, 0);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            error("Error al leer token: " + e.getMessage());
+        }
+    }
+
+    private void error(String mensaje) {
+        System.err.println("ERROR: " + mensaje);
+        if (tokenActual != null) {
+            System.err.println("En línea: " + (tokenActual.getLinea() + 1) +
+                    ", columna: " + (tokenActual.getColumna() + 1));
         }
     }
 }
