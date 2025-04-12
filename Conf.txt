@@ -27,11 +27,43 @@ IGUAL= "="
 MAS= "+"
 MENOS= "-"
 saltoLinea= \n|\r
+LetraA = "a"
+LetraB = "b"
+LetraC = "c"
+LetraD = "d"
 //expresiones
 ENTERO	= [0-9]+
-ID      = [A-Za-zñÑ][_0-9A-Za-zñÑ]*
+ID      = [E-Ze-zñÑ][_0-9A-Za-zñÑ]*
 
 %%
+// Reglas léxicas - Letras individuales
+{LetraA} {
+    System.out.println("Detectada LETRA_A: " + yytext());
+    Tokens tok = new Tokens(yytext(), Sym.LETRA_A, yyline, yycolumn);
+    this.hayToken = true;
+    return tok;
+}
+
+{LetraB} {
+    System.out.println("Detectada LETRA_B: " + yytext());
+    Tokens tok = new Tokens(yytext(), Sym.LETRA_B, yyline, yycolumn);
+    this.hayToken = true;
+    return tok;
+}
+
+{LetraC} {
+    System.out.println("Detectada LETRA_C: " + yytext());
+    Tokens tok = new Tokens(yytext(), Sym.LETRA_C, yyline, yycolumn);
+    this.hayToken = true;
+    return tok;
+}
+
+{LetraD} {
+    System.out.println("Detectada LETRA_D: " + yytext());
+    Tokens tok = new Tokens(yytext(), Sym.LETRA_D, yyline, yycolumn);
+    this.hayToken = true;
+    return tok;
+}
 {IGUAL} {
 	Tokens tok=new Tokens(yytext(),Sym.IGUAL,yyline,yycolumn);
 	this.hayToken=true;

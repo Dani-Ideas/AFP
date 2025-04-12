@@ -5,8 +5,9 @@
  */
 package fes.aragon.inicio;
 
-import fes.aragon.codigo.Lexico;
 import fes.aragon.codigo.Sym;
+
+import fes.aragon.codigo.Lexico;
 import fes.aragon.codigo.Tokens;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -27,15 +28,19 @@ public class Inicio {
         try {
             buf = new BufferedReader(new FileReader(System.getProperty("user.dir") + "/archivo.txt"));
             ap.analizador = new Lexico(buf);
+            
             //ap.siguienteToken();
             //ap.sentencia();
-            ap.S();
+            //ap.S();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void S() {
+
+
+    /*
+    *private void S() {
         siguienteToken();
         A();
         if (error==false) {
@@ -48,8 +53,7 @@ public class Inicio {
             System.out.println("error");
         }
     }
-
-    private void A() {
+    *  private void A() {
         if(tokens.getLexema() == Sym.ENTERO) {
             siguienteToken();
             if (tokens.getLexema() == Sym.MAS) {
@@ -125,7 +129,7 @@ public class Inicio {
 
     private void errorSintactico() {
         this.error = false;
-        //descartar todo hasta encontrar ;            
+        //descartar todo hasta encontrar ;
         do {
             System.out.println(tokens.toString());
             if (tokens.getLexema() != Sym.PUNTOCOMA) {
@@ -134,8 +138,8 @@ public class Inicio {
         } while (tokens.getLexema() != Sym.PUNTOCOMA && tokens.getLexema() != Sym.EOF);
 
     }
-
-    private void siguienteToken() {
+    *
+    * private void siguienteToken() {
         try {
             tokens = analizador.yylex(); // me da el sigioente token para los paisanos
             if (tokens == null) { // si es null fin ya acabo
@@ -145,5 +149,7 @@ public class Inicio {
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
         }
-    }
+    }*/
+
+
 }
