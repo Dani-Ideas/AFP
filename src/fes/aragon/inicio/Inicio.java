@@ -11,6 +11,7 @@ import fes.aragon.codigo.Tokens;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Stack;
 
 /**
  *
@@ -20,6 +21,7 @@ public class Inicio {
     private boolean error = false;
     private Tokens tokens = null;
     private Lexico analizador = null;
+    private Stack<String> pila = new Stack<>();
 
     public static void main(String[] args) {
         Inicio ap = new Inicio();
@@ -36,32 +38,52 @@ public class Inicio {
     }
 
     private void S() {
+        pila.push(";");
+        pila.push("S");
         siguienteToken();
-        A();
-        if (error==false) {
-            if (tokens.getLexema() == Sym.PUNTOCOMA) {
-                System.out.println("correcto");
-            } else {
-                System.out.println("incorrecto");
-            }
-        } else {
-            System.out.println("error");
-        }
-    }
+        if (tokens.getLexema() == Sym.A || tokens.getLexema() == Sym.B) {
+            System.out.println("🔍 Token leído: " + tokens.getLexema() + " (" + tokens.getToken() + ") "+"Aplicando axioma: S := AB");
+            // Simulamos el comportamiento de la pila como derivación
+            pila.pop(); // quitamos S
+            pila.push("B"); // metemos B
+            pila.push("A"); // metemos A
 
-    private void A() {
-        if(tokens.getLexema() == Sym.ENTERO) {
-            siguienteToken();
-            if (tokens.getLexema() == Sym.MAS) {
-                siguienteToken();
+            A();
+            if (!error) {
                 B();
-            }else {
-                error = true;
-                System.out.println("Error en A-> se espera un mas");
             }
         } else {
             error = true;
-            System.out.println("Error en A-> se espera un entero");
+            System.out.println("Error: Token inválido para el axioma S. Se esperaba 'a' o 'b'");
+        }
+
+        if (!error) {
+            siguienteToken(); // buscamos el punto y coma
+            if (tokens.getLexema() == Sym.PUNTOCOMA) {
+                System.out.println("✔️ Punto y coma encontrado.");
+                System.out.println("🌀 Contenido de la pila: " + pila);
+                System.out.println("📥 Aquí comenzaría la fase de análisis de derecha a izquierda.");
+            } else {
+                error = true;
+                System.out.println("❌ Error: Se esperaba ';' después de la expresión.");
+            }
+        }
+    }
+
+
+    private void A() {
+        System.out.println("🔍 Analizando A con token: " + tokens.getLexema() + " (" + tokens.getToken() + ")");
+
+        if (tokens.getLexema() == Sym.A) {
+            pila.pop(); // quitamos A porque lo reemplazamos por 'a'
+            System.out.println("✅ Producción aplicada: A := a");
+            siguienteToken(); // consumimos 'a'
+        } else if (tokens.getLexema() == Sym.B) {
+            pila.pop(); // quitamos A porque A := λ
+            System.out.println("✅ Producción aplicada: A := λ (epsilon)");
+        } else {
+            error = true;
+            System.out.println("❌ Error en A: Token inesperado. Se esperaba 'a' o 'b'");
         }
     }
 
@@ -125,7 +147,7 @@ public class Inicio {
 
     private void errorSintactico() {
         this.error = false;
-        //descartar todo hasta encontrar ;            
+        //descartar todo hasta encontrar ;
         do {
             System.out.println(tokens.toString());
             if (tokens.getLexema() != Sym.PUNTOCOMA) {
@@ -137,11 +159,12 @@ public class Inicio {
 
     private void siguienteToken() {
         try {
-            tokens = analizador.yylex(); // me da el sigioente token para los paisanos
-            if (tokens == null) { // si es null fin ya acabo
+            tokens = analizador.yylex();
+            if (tokens == null) {
                 tokens = new Tokens("EOF", Sym.EOF, 0, 0);
                 throw new IOException("Fin Archivo");
             }
+            System.out.println("🔍 Token leído: " + tokens.getLexema() + " (" + tokens.getToken() + ")");
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
         }

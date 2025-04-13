@@ -38,7 +38,7 @@ public class Tokens {
         this.lexema = lexema;
     }
 
-    
+
 
     public int getLinea() {
         return linea;
@@ -60,7 +60,16 @@ public class Tokens {
     public String toString() {
         return "Tokens{" + "token=" + token + ", lexema=" + lexema + ", linea=" + linea + ", columna=" + columna + '}';
     }
-    
-    
-    
+    public String getLexemaNombre() {
+        switch (token) {
+            case Sym.A: return "a";
+            case Sym.B: return "b";
+            case Sym.C: return "c";
+            case Sym.D: return "d";
+            case Sym.PUNTOCOMA: return ";";
+            default: return lexema;
+        }
+    }
+
+
 }

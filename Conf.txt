@@ -26,10 +26,14 @@ PuntoComa=";"
 IGUAL= "="
 MAS= "+"
 MENOS= "-"
+LETRA_A= "a"
+LETRA_B= "b"
+LETRA_C= "c"
+LETRA_D= "d"
 saltoLinea= \n|\r
 //expresiones
 ENTERO	= [0-9]+
-ID      = [A-Za-zñÑ][_0-9A-Za-zñÑ]*
+ID      = [E-Ze-zñÑ][_0-9E-Ze-zñÑ]*
 
 %%
 {IGUAL} {
@@ -53,6 +57,26 @@ ID      = [A-Za-zñÑ][_0-9A-Za-zñÑ]*
 	this.hayToken=true;
 	return tok;
 }
+{LETRA_A} {
+	Tokens tok = new Tokens(yytext(), Sym.A, yyline, yycolumn);
+	this.hayToken = true;
+	return tok;
+}
+{LETRA_B} {
+	Tokens tok = new Tokens(yytext(), Sym.B, yyline, yycolumn);
+	this.hayToken = true;
+	return tok;
+}
+{LETRA_C} {
+	Tokens tok = new Tokens(yytext(), Sym.C, yyline, yycolumn);
+	this.hayToken = true;
+	return tok;
+}
+{LETRA_D} {
+	Tokens tok = new Tokens(yytext(), Sym.D, yyline, yycolumn);
+	this.hayToken = true;
+	return tok;
+}
 {ID} {
 	Tokens tok=new Tokens(yytext(),Sym.ID,yyline,yycolumn);
 	this.hayToken=true;
@@ -70,7 +94,7 @@ ID      = [A-Za-zñÑ][_0-9A-Za-zñÑ]*
 	//return tok;
 }
 {Espacio} {
-	
+
 }
 . {
         String errLex = "Error léxico : '"+yytext()+"' en la línea: "
