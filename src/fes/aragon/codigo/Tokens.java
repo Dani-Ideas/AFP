@@ -38,8 +38,6 @@ public class Tokens {
         this.lexema = lexema;
     }
 
-
-
     public int getLinea() {
         return linea;
     }
