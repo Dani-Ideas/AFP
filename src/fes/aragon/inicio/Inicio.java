@@ -40,77 +40,110 @@ public class Inicio {
     private void S() {
         pila.push(";");
         pila.push("S");
-        siguienteToken();
-        if (tokens.getLexema() == Sym.A || tokens.getLexema() == Sym.B) {
-            System.out.println("🔍 Token leído: " + tokens.getLexema() + " (" + tokens.getToken() + ") "+"Aplicando axioma: S := AB");
-            // Simulamos el comportamiento de la pila como derivación
-            pila.pop(); // quitamos S
-            pila.push("B"); // metemos B
-            pila.push("A"); // metemos A
-
-            A();
-            if (!error) {
-                B();
-            }
-        } else {
-            error = true;
-            System.out.println("Error: Token inválido para el axioma S. Se esperaba 'a' o 'b'");
-        }
-
-        if (!error) {
-            siguienteToken(); // buscamos el punto y coma
-            if (tokens.getLexema() == Sym.PUNTOCOMA) {
-                System.out.println("✔️ Punto y coma encontrado.");
-                System.out.println("🌀 Contenido de la pila: " + pila);
-                System.out.println("📥 Aquí comenzaría la fase de análisis de derecha a izquierda.");
-            } else {
-                error = true;
-                System.out.println("❌ Error: Se esperaba ';' después de la expresión.");
-            }
-        }
+        siguienteToken(); // Primer token
+        Derivador(); // Aquí controlamos todo el análisis
     }
 
 
-    private void A() {
-        System.out.println("🔍 Analizando A con token: " + tokens.getLexema() + " (" + tokens.getToken() + ")");
-
+    private String A() {
+        System.out.print("🔍 Analizando A con token: " + tokens.getLexema() + " (" + tokens.getToken() + ")  ");
         if (tokens.getLexema() == Sym.A) {
-            pila.pop(); // quitamos A porque lo reemplazamos por 'a'
             System.out.println("✅ Producción aplicada: A := a");
-            siguienteToken(); // consumimos 'a'
+            return "a";
         } else if (tokens.getLexema() == Sym.B) {
-            pila.pop(); // quitamos A porque A := λ
             System.out.println("✅ Producción aplicada: A := λ (epsilon)");
+            return ""; // Epsilon
         } else {
             error = true;
-            System.out.println("❌ Error en A: Token inesperado. Se esperaba 'a' o 'b'");
+            System.out.println("❌ Error en A: Se esperaba 'a' o 'b'");
+            return "";
         }
     }
-
-    private void B() {
-        if(tokens.getLexema() == Sym.ENTERO) {
-            siguienteToken();
+    private String B() {
+        if(tokens.getLexema() == Sym.B) {
+            System.out.println("✅ Producción aplicada: B := bCd");
+            return "bCd";
         } else {
             error = true;
-            System.out.println("error en B-> se espera un entero");
+            System.out.println("error en B-> se espera 'b' y solo 'b'");
+            return "";
         }
     }
+    private String C() {
+        if(tokens.getLexema() == Sym.C) {
+            System.out.println("✅ Producción aplicada: C:=c");
+            return "c";
+        } else if (tokens.getLexema() == Sym.D) {
+            System.out.println("✅ Producción aplicada: C:=λ (epsilon)");
+            return ""; // Epsilon
+        } else {
+            error = true;
+            System.out.println("error en C-> se espera 'c' o 'd'");
+            return "";
+        }
+    }
+    private void Derivador() {
+        while (!pila.isEmpty() && !error) {
+            String cima = pila.peek(), resultado; // Revisamos el símbolo en la cima de la pila
 
-    private void sentencia() {
-        do {
-            asignacion();
-            if (tokens.getLexema() != Sym.PUNTOCOMA) {
-                errorSintactico();
-                siguienteToken();
+            switch (cima) {
+                case "A":
+                    pila.pop(); // Retiramos "A" de la pila
+                    resultado = A(); // Aplicamos la producción para A
+                    if (!resultado.equals("")) {
+                        pila.push(resultado); // Insertamos el resultado (por ejemplo, 'a')
+                    }
+                    break;
+
+                case "B":
+                    pila.pop(); // Retiramos "B" de la pila
+                    resultado=B();
+                    if (!resultado.isEmpty()) {
+                        for (int i = resultado.length() - 1; i >= 0; i--) {
+                            pila.push(String.valueOf(resultado.charAt(i)));
+                        }
+                    }
+                    break;
+                case "C":
+                    pila.pop(); // Retiramos "C" de la pila
+                    resultado = C();
+                    if (!resultado.equals("")) {
+                        pila.push(resultado);
+                    }
+                    break;
+                case "S":
+                    pila.pop(); // quitamos S
+                    pila.push("B");
+                    pila.push("A");
+                    System.out.println("✅ Producción aplicada: S := AB");
+                    break;
+
+                case ";":
+                    if (tokens.getLexema() == Sym.PUNTOCOMA) {
+                        pila.pop(); // Consumimos el punto y coma de la pila
+                        System.out.println("✔️ Punto y coma encontrado.");
+                        siguienteToken(); // Avanzamos al siguiente token para continuar con la derivación a derecha
+                        // Continuar vaciando la pila y tokens
+                    } else {
+                        error = true;
+                        System.out.println("❌ Error: Se esperaba ';' al final de la expresión.");
+                        break;
+                    }
+                    break;
+
+                default:
+                    // Si es un terminal esperado, lo comparamos con el token actual
+                    if (cima.equals(tokens.getLexemaNombre())) {
+                        pila.pop(); // Consumimos de la pila
+                        siguienteToken(); // Avanzamos al siguiente token
+                    } else {
+                        error = true;
+                        System.out.println("❌ Error: Token inesperado. Se esperaba '" + cima + "'");
+                    }
+                    break;
             }
-            if (!this.error) {
-                System.out.println("Invalida linea= " + (tokens.getLinea() + 1));
-                this.error = true;
-            } else {
-                System.out.println("Valida  linea= " + (tokens.getLinea() + 1));
-            }
-            siguienteToken();
-        } while (tokens.getLexema() != Sym.EOF);
+
+        }
     }
 
     private void asignacion() {
@@ -164,7 +197,7 @@ public class Inicio {
                 tokens = new Tokens("EOF", Sym.EOF, 0, 0);
                 throw new IOException("Fin Archivo");
             }
-            System.out.println("🔍 Token leído: " + tokens.getLexema() + " (" + tokens.getToken() + ")");
+            System.out.print("🔍 Token leído: " + tokens.getLexema() + " (" + tokens.getToken() + ")   ");
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
         }

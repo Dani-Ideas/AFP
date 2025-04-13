@@ -61,15 +61,14 @@ public class Tokens {
         return "Tokens{" + "token=" + token + ", lexema=" + lexema + ", linea=" + linea + ", columna=" + columna + '}';
     }
     public String getLexemaNombre() {
-        switch (token) {
+        switch (lexema) {
             case Sym.A: return "a";
             case Sym.B: return "b";
             case Sym.C: return "c";
             case Sym.D: return "d";
             case Sym.PUNTOCOMA: return ";";
-            default: return lexema;
+            default: return token; // Si no coincide, devuelve el token como texto
         }
     }
-
 
 }
